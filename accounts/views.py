@@ -1,17 +1,23 @@
-from .forms import AccountCreationForm
-from django.shortcuts import render, redirect
+from rest_framework import generics, urls
+from django.contrib.auth import get_user_model
+from accounts.serializers import (
+    AccountCreateSerializer,
+    AccountListSerializer,
+    AccountDetailSerializer,
+)
+
+User = get_user_model()
 
 
-def account_registration(request):
-    """Регистрации нового пользователя"""
-    form = AccountCreationForm()
-    if request.method == "POST":
-        form = AccountCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            password = form.cleaned_data['password1']
-            user.set_password(password)
-            user.save()
+class AccountDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = AccountDetailSerializer
+    queryset = User.objects.all()
 
-    context = {'form': form}
-    return render(request, 'accounts/registration.html', context)
+
+class AccountCreateView(generics.CreateAPIView):
+    serializer_class = AccountCreateSerializer
+
+
+class AccountListView(generics.ListAPIView):
+    serializer_class = AccountListSerializer
+    queryset = User.objects.all()
